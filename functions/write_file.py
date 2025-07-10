@@ -1,4 +1,23 @@
 import os
+from google.genai import types
+
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description="Overwrites a file in the specified directory, constrained to the working directory. If the file doesn't exist, it's created and written.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="The directory to write files from, relative to the working directory. If not provided, writes files in the working directory itself.",
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="The content to be written to the file"
+            )
+        },
+    ),
+)
 
 def write_file(working_directory, file_path, content):
     if content is None:
