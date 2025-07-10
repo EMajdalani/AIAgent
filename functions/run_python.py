@@ -8,9 +8,9 @@ schema_run_python_file = types.FunctionDeclaration(
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
-            "directory": types.Schema(
+            "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="The directory to run files from, relative to the working directory. If not provided, runs files in the working directory itself.",
+                description="The name of the Python file to run within the working directory.",
             ),
         },
     ),

@@ -7,11 +7,13 @@ from functions.get_files_info import schema_get_files_info
 from functions.get_file_content import schema_get_file_content
 from functions.run_python import schema_run_python_file
 from functions.write_file import schema_write_file
+from functions.call_function import call_function
 
 def main():
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
     client = genai.Client(api_key=api_key)
+    function_content = None
     system_prompt = """
     You are a helpful AI coding agent.
 
@@ -54,23 +56,42 @@ def main():
     response_tokens = metadata.candidates_token_count
     prompt_tokens = metadata.prompt_token_count
     function_info = response.function_calls
-
-    if response.text is None:
-        print("No response text generated.")
-    else:
-        print(response.text)
-    if function_info is not None:
-        for function in function_info:
-            print(f"Calling function: {function.name}({function.args})")
-
         
 
     if len(sys.argv) > 2:
         if sys.argv[2] == "--verbose":
+
+            if function_info is not None:
+                function_result = call_function(function_info[0], verbose=True)
+                try:
+                    function_content = function_result.parts[0].function_response.response
+                except Exception as e:
+                    return f"Error: No function output found {e}"
+                
+            if getattr(response, "text", None):
+                print(response.text)
+
+            if function_info is not None:
+                print(f"-> {function_content}")
+
             print(f"User prompt: {sys.argv[1]}")
             print(f"Prompt tokens: {prompt_tokens}")
             print(f"Response tokens: {response_tokens}")
+    else:
 
+        if function_info is not None:
+            function_result = call_function(function_info[0], verbose=False)
+            try:
+                function_content = function_result.parts[0].function_response.response
+            except Exception as e:
+                return f"Error: No function output found {e}"
+        
+        if getattr(response, "text", None):
+            print(response.text)
+
+        if function_info is not None:
+            print(f"-> {function_content}")
+        
     return
 
 main()
